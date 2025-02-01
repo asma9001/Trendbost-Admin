@@ -206,7 +206,7 @@ const FinancialOverview = () => {
             {platformRevenue.map((platform) => (
               <Box key={platform._id} sx={{ flex: "1 1 calc(33.33% - 16px)" }}>
                 <AnimatedRevenue
-                  platform={platform._id}
+                  platform={platform.platform}
                   revenue={platform.total}
                 />
               </Box>

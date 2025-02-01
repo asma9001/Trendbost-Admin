@@ -75,18 +75,20 @@ const UserDetail = () => {
 
     fetchSubscriptions();
   }, [viewUserDetails.userId]);
+
   useEffect(() => {
     const fetchUserHistory = async () => {
       try {
         const response = await axiosInstance.get(`/userHistory/${id}`);
-        setUserHistory(response.data); // Assuming setUserHistory is defined in your state
+        setUserHistory(response.data);
       } catch (error) {
         toast.error("Failed to fetch user history.");
       }
     };
-  
+
     fetchUserHistory();
   }, [id]);
+
   const handleBackClick = () => {
     navigate(-1);
   };
@@ -109,30 +111,39 @@ const UserDetail = () => {
     }
   };
 
-  const handlePreviewClick = (transaction) => {
-    navigate(
-      `/users-detail/user/${transaction.id}/transaction/${transaction.id}`,
-      {
-        state: { transaction, viewUserDetails, userHistory, getSubscriptions },
-      }
-    );
+  const handlePreviewClick = (row) => {
+    const subscription = getSubscriptions[row.id - 1]; // Get the subscription details based on row ID
+    navigate(`/users-detail/user/${row.id}/transaction/${row.id}`, {
+      state: {
+        transaction: row,
+        viewUserDetails,
+        userHistory,
+        subscription,
+      },
+    });
   };
-  console.log(getSubscriptions);
 
   const rows =
-    getSubscriptions.map((historyItem, index) => ({
+    getSubscriptions.map((historyItem, index) => {
+      const subscriptionDetails =
+        historyItem.subscriptionId || historyItem.customizePlanId;
 
-      id: index + 1,
-      transactionId: userHistory[0].transactionId,
-      planName: historyItem.subscriptionId.planName || "N/A",
-      platform: historyItem.subscriptionId.platform || "N/A",
-      status: historyItem.status || "N/A",
-      startDate: formatDate(historyItem.startDate),
-      endDate:
-        historyItem.endDate === "Ongoing"
-          ? "Ongoing"
-          : formatDate(historyItem.endDate),
-    })) || [];
+      return {
+        id: index + 1,
+        transactionId: userHistory[index]?.transactionId || "N/A",
+        planName: subscriptionDetails.planName || "N/A",
+        platform:
+          subscriptionDetails.platform ||
+          subscriptionDetails.platform_Name ||
+          "N/A",
+        status: historyItem.status || "N/A",
+        startDate: formatDate(historyItem.startDate),
+        endDate:
+          historyItem.endDate === "Ongoing"
+            ? "Ongoing"
+            : formatDate(historyItem.endDate),
+      };
+    }) || [];
 
   const columns = [
     { field: "transactionId", headerName: "Transaction ID", width: 150 },

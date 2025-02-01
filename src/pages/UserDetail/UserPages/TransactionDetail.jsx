@@ -10,31 +10,35 @@ import axiosInstance from "../../../axiosInstance.js";
 const TransactionDetail = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { transaction, viewUserDetails, userHistory, getSubscriptions } =
-    location.state;
-  const [getStats, setGetStats] = useState([]);
+  const { transaction, viewUserDetails, subscription } = location.state; // Get the subscription data from the state
+  const [getStats, setGetStats] = useState({});
   const [getDetailsOfConsumption, setGetDetailsOfConsumption] = useState([]);
+
   useEffect(() => {
     const fetchConsumptionStats = async () => {
       try {
-        const subscriptionId = userHistory[0].subscriptionId._id;
+        const subscriptionId = subscription.subscriptionId?._id || null;
+        const customizePlanId = subscription.customizePlanId?._id || null;
 
         const response = await axiosInstance.get(
           "/subscriptionConsumption/stats",
           {
             params: {
-              userId: viewUserDetails._id,
+              userId: viewUserDetails.userId,
               subscriptionId: subscriptionId,
+              customizePlanId: customizePlanId,
             },
           }
         );
         setGetStats(response.data);
+
         const getAllConsumption = await axiosInstance.get(
           "/subscriptionConsumption/getSubscriptionConsumption",
           {
             params: {
               userId: viewUserDetails.userId,
               subscriptionId: subscriptionId,
+              customizePlanId: customizePlanId,
             },
           }
         );
@@ -44,19 +48,19 @@ const TransactionDetail = () => {
       }
     };
 
-    if (viewUserDetails && userHistory) {
+    if (subscription) {
       fetchConsumptionStats();
     }
-  }, [viewUserDetails, userHistory]);
-
+  }, [subscription, viewUserDetails.userId]);
+  console.log(getDetailsOfConsumption);
   const rows = getDetailsOfConsumption.map((historyItem, index) => ({
     id: index + 1,
     transactionId: historyItem.transactionId,
     likes: historyItem.consumedLikes || 0,
     comments: historyItem.consumedComments || 0,
     followers: historyItem.consumedFollowers || 0,
-    postLink: historyItem.postLink || 0,
-    status: historyItem.status || 0,
+    postLink: historyItem.postLink || "N/A",
+    status: historyItem.status || "N/A",
   }));
 
   const columns =
@@ -100,7 +104,7 @@ const TransactionDetail = () => {
             {transaction.platform} - {transaction.planName}
           </Typography>
           <Grid container spacing={2} sx={{ marginTop: 2 }}>
-            {transaction.platform !== "TikTok Live" ? (
+            {transaction.planName === "Customized" ? (
               <>
                 <Grid item xs={4}>
                   <Box
@@ -142,7 +146,7 @@ const TransactionDetail = () => {
                   </Box>
                 </Grid>
               </>
-            ) : (
+            ) : transaction.platform === "TikTok Live" ? (
               <Grid item xs={12}>
                 <Box
                   sx={{ padding: 2, boxShadow: 1, border: "1px solid #ddd" }}
@@ -157,6 +161,48 @@ const TransactionDetail = () => {
                   </Typography>
                 </Box>
               </Grid>
+            ) : (
+              <>
+                <Grid item xs={4}>
+                  <Box
+                    sx={{ padding: 2, boxShadow: 1, border: "1px solid #ddd" }}
+                  >
+                    <Typography variant="h6">Likes</Typography>
+                    <Typography>
+                      Consumed: {getStats.consumedLikes || 0}
+                    </Typography>
+                    <Typography>
+                      Remaining: {getStats.remainingLikes || 0}
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={4}>
+                  <Box
+                    sx={{ padding: 2, boxShadow: 1, border: "1px solid #ddd" }}
+                  >
+                    <Typography variant="h6">Comments</Typography>
+                    <Typography>
+                      Consumed: {getStats.consumedComments || 0}
+                    </Typography>
+                    <Typography>
+                      Remaining: {getStats.remainingComments || 0}
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={4}>
+                  <Box
+                    sx={{ padding: 2, boxShadow: 1, border: "1px solid #ddd" }}
+                  >
+                    <Typography variant="h6">Followers</Typography>
+                    <Typography>
+                      Consumed: {getStats.consumedFollowers || 0}
+                    </Typography>
+                    <Typography>
+                      Remaining: {getStats.remainingFollowers || 0}
+                    </Typography>
+                  </Box>
+                </Grid>
+              </>
             )}
           </Grid>
           <Typography variant="h6" sx={{ fontWeight: "bold", marginTop: 3 }}>
