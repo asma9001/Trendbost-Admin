@@ -13,7 +13,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import axios from "axios";
+import axiosInstance from "../../axiosInstance.js";
 const Login = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
@@ -32,8 +32,8 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/adminAuth/adminLogin/",
+      const response = await axiosInstance.post(
+        "/adminAuth/adminLogin/",
         {
           userName,
           password,
