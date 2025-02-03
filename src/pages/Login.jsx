@@ -13,7 +13,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import axiosInstance from "../../axiosInstance.js";
+import axiosInstance from "../axiosInstance.js";
 const Login = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
