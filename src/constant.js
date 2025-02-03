@@ -1,4 +1,4 @@
 const constant = {
-    baseUrl:"http://localhost:5000/api"
+    baseUrl:"https://trendbost-api.vercel.app/api"
 }
 export default constant;
